@@ -2,9 +2,11 @@
 
 A small offline app for looking up answers from the Thai past-paper answer keys.
 
+Live site: **https://phatphumt.github.io/4-subject-answer-finder/**
+
 ## Open
 
-Double-click `index.html`.
+Open the live link, or double-click `index.html` for the offline copy.
 
 No server or internet connection is needed. Tailwind and the Anuphan font are stored locally.
 
