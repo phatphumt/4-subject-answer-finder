@@ -3,116 +3,141 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1d4ed8">
+  <meta name="description" content="สร้างกระดาษคำตอบและตรวจคำตอบช่วงข้อที่เลือก พร้อมคะแนนและเฉลยรายข้อ">
   <title>ตรวจคำตอบ</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ตรวจคำตอบ">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="styles.css">
   <script src="vendor/tailwind.js"></script>
-  <style>
-    @font-face {
-      font-family: "Anuphan";
-      font-style: normal;
-      font-weight: 100 900;
-      font-display: swap;
-      src: url("fonts/anuphan-thai.woff2") format("woff2");
-      unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC;
-    }
-    @font-face {
-      font-family: "Anuphan";
-      font-style: normal;
-      font-weight: 100 900;
-      font-display: swap;
-      src: url("fonts/anuphan-vietnamese.woff2") format("woff2");
-      unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-    }
-    @font-face {
-      font-family: "Anuphan";
-      font-style: normal;
-      font-weight: 100 900;
-      font-display: swap;
-      src: url("fonts/anuphan-latin-ext.woff2") format("woff2");
-      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
-    }
-    @font-face {
-      font-family: "Anuphan";
-      font-style: normal;
-      font-weight: 100 900;
-      font-display: swap;
-      src: url("fonts/anuphan-latin.woff2") format("woff2");
-      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-    }
-    html, body {
-      font-family: "Anuphan", sans-serif;
-    }
-  </style>
 </head>
 <body class="min-h-screen bg-white text-gray-900">
-  <main class="mx-auto w-full max-w-md p-5 pb-24">
-    <div class="text-center">
-      <h1 class="text-2xl font-bold leading-tight">ตรวจคำตอบ</h1>
-      <p class="mt-2 text-sm text-gray-600">เลือกวิชา บทที่ และช่วงข้อ</p>
-      <a href="index.html"
-         class="mt-3 inline-block text-sm font-medium text-blue-700 underline underline-offset-4 hover:text-blue-800">
-        ค้นหาเฉลย
+  <a href="#main" class="skip-link">ข้ามไปที่เนื้อหา</a>
+
+  <header class="appbar">
+    <div class="mx-auto flex h-16 w-full max-w-6xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+      <a href="index.html" class="flex min-w-0 items-center gap-2.5" aria-label="ค้นหาเฉลยข้อสอบ หน้าแรก">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" class="h-4 w-4">
+            <circle cx="10.5" cy="10.5" r="6.5"></circle>
+            <path d="m15.5 15.5 4.5 4.5"></path>
+          </svg>
+        </span>
+        <span class="flex min-w-0 flex-col leading-tight">
+          <span class="truncate text-[13px] font-semibold sm:text-[15px]">ตรวจคำตอบ</span>
+          <span class="hidden text-[11px] text-gray-500 sm:block">ฟิสิกส์ · เคมี · ชีววิทยา · คณิตศาสตร์</span>
+        </span>
       </a>
+
+      <nav class="ml-auto flex flex-none items-center gap-4 text-sm font-medium" aria-label="เมนูหลัก">
+        <a href="index.html" class="nav-link">ค้นหาเฉลย</a>
+        <a href="answer-sheet.html" class="nav-link" aria-current="page">ตรวจคำตอบ</a>
+      </nav>
     </div>
+  </header>
 
-    <form id="setup-form" class="mt-8 space-y-5">
-      <label class="block">
-        <span class="mb-2 block text-sm font-medium">วิชา</span>
-        <select id="subject" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-base focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200"></select>
-      </label>
+  <main id="main" class="mx-auto w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pt-10">
+    <div class="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:items-start lg:gap-6">
 
-      <label class="block">
-        <span class="mb-2 block text-sm font-medium">บทที่</span>
-        <select id="chapter" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-base focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200"></select>
-      </label>
+      <!-- ------------------------------ setup ------------------------------ -->
+      <section class="card p-5 lg:sticky lg:top-24 lg:p-6" aria-labelledby="setup-title">
+        <h1 id="setup-title" class="text-xl font-semibold">ตรวจคำตอบ</h1>
+        <p class="mt-1 text-sm text-gray-600">สร้างกระดาษคำตอบสำหรับช่วงข้อที่ต้องการ</p>
 
-      <div class="grid grid-cols-2 gap-4">
-        <label class="block">
-          <span class="mb-2 block text-sm font-medium">ข้อเริ่มต้น</span>
-          <input id="start" type="number" min="1" step="1" inputmode="numeric"
-                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-base focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200">
-        </label>
-        <label class="block">
-          <span class="mb-2 block text-sm font-medium">ข้อสุดท้าย</span>
-          <input id="end" type="number" min="1" step="1" inputmode="numeric"
-                 class="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-base focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200">
-        </label>
-      </div>
+        <form id="setup-form" class="mt-5 space-y-4">
+          <label for="subject" class="block">
+            <span class="step"><span class="step-num" aria-hidden="true">1</span>วิชา</span>
+            <select id="subject" class="field"></select>
+          </label>
 
-      <button type="submit"
-              class="w-full rounded-lg bg-blue-700 px-4 py-3 text-base font-medium text-white transition-colors hover:bg-blue-800 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2">
-        สร้างกระดาษคำตอบ
-      </button>
-    </form>
+          <label for="chapter" class="block">
+            <span class="step"><span class="step-num" aria-hidden="true">2</span>บทที่</span>
+            <select id="chapter" class="field"></select>
+          </label>
 
-    <p id="error" class="mt-5 hidden rounded-lg border border-red-300 p-4 text-center text-sm text-red-700"></p>
+          <div>
+            <span class="step"><span class="step-num" aria-hidden="true">3</span>ช่วงข้อ</span>
+            <div class="grid grid-cols-2 gap-3">
+              <label for="start" class="block">
+                <span class="mb-1.5 block text-xs text-gray-500">ข้อเริ่มต้น</span>
+                <input id="start" type="number" min="1" step="1" inputmode="numeric" class="field">
+              </label>
+              <label for="end" class="block">
+                <span class="mb-1.5 block text-xs text-gray-500">ข้อสุดท้าย</span>
+                <input id="end" type="number" min="1" step="1" inputmode="numeric" class="field">
+              </label>
+            </div>
+            <p id="range-hint" class="mt-2 text-xs text-gray-500"></p>
+          </div>
 
-    <section id="sheet" class="mt-8 hidden">
-      <div class="text-center">
-        <p id="sheet-info" class="text-sm leading-relaxed text-gray-600"></p>
-        <p id="score" class="mt-3 hidden text-xl font-bold"></p>
-        <div class="mt-4 flex justify-center gap-3">
-          <button id="check" type="button"
-                  class="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-800 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2">
-            ตรวจคำตอบ
+          <button type="submit" class="btn btn-primary w-full">
+            สร้างกระดาษคำตอบ
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                 stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
           </button>
-          <button id="reveal" type="button"
-                  class="hidden rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200">
-            แสดงเฉลย
-          </button>
+        </form>
+
+        <p id="error" class="mt-4 rounded-lg border border-red-300 px-3 py-2.5 text-sm text-red-700" hidden></p>
+
+        <p class="mt-4 text-center text-[11px] leading-relaxed text-gray-500">
+          ตัวเลือกจะปรับตามรูปแบบเฉลยของแต่ละบท
+        </p>
+      </section>
+
+      <!-- ------------------------------ sheet ------------------------------ -->
+      <section class="lg:col-span-2" aria-label="กระดาษคำตอบ">
+
+        <div id="sheet-idle" class="card flex min-h-[20rem] flex-col items-center justify-center p-8 text-center lg:min-h-[34rem]">
+          <span class="grid h-14 w-14 place-items-center rounded-lg bg-gray-100 text-gray-500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+                 stroke-linejoin="round" class="h-6 w-6" aria-hidden="true">
+              <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h9L20 9.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5Z"></path>
+              <path d="M14 4v6h6"></path>
+              <path d="m8.5 15 1.8 1.8L14 13"></path>
+            </svg>
+          </span>
+          <p class="mt-4 text-base font-medium">ยังไม่มีกระดาษคำตอบ</p>
+          <p class="mt-1 max-w-xs text-sm leading-relaxed text-gray-600">
+            เลือกวิชา บทที่ และช่วงข้อ แล้วกด “สร้างกระดาษคำตอบ” เพื่อเริ่มทำแบบฝึกหัด
+          </p>
         </div>
-      </div>
 
-      <div id="rows" class="mt-6 space-y-4"></div>
-    </section>
+        <div id="sheet" hidden>
+          <div class="card z-20 mb-4 flex flex-wrap items-center gap-3 p-4 lg:sticky lg:top-16">
+            <div class="min-w-0 flex-1 basis-full sm:basis-0">
+              <p id="sheet-info" class="text-sm font-medium sm:truncate"></p>
+              <p id="score" class="text-sm text-gray-600" hidden></p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="check" type="button" class="btn btn-primary btn-sm">ตรวจคำตอบ</button>
+              <button id="reveal" type="button" class="btn btn-ghost btn-sm" hidden>แสดงเฉลย</button>
+              <button id="reset" type="button" class="btn btn-ghost btn-sm" title="ล้างคำตอบทั้งหมด">ล้าง</button>
+            </div>
+          </div>
+
+          <div id="rows" class="grid grid-cols-1 gap-3 sm:grid-cols-2"></div>
+        </div>
+
+      </section>
+
+    </div>
   </main>
 
-  <button id="to-top" type="button" aria-label="กลับขึ้นด้านบน"
-          class="fixed bottom-5 right-5 hidden rounded-full border border-blue-800 bg-blue-700 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2">
+  <button id="to-top" type="button" aria-label="กลับขึ้นด้านบน" hidden
+          class="fixed bottom-5 right-5 z-30 rounded-full border border-blue-800 bg-blue-700 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2">
     ↑ ขึ้นบนสุด
   </button>
 
   <script src="data.js"></script>
   <script src="answer-sheet.js"></script>
   <script src="to-top.js"></script>
+  <script src="pwa.js"></script>
 </body>
 </html>

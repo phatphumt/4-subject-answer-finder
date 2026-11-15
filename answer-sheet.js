@@ -6,14 +6,17 @@
   var chapterEl = document.getElementById("chapter");
   var startEl = document.getElementById("start");
   var endEl = document.getElementById("end");
+  var rangeHintEl = document.getElementById("range-hint");
   var setupForm = document.getElementById("setup-form");
   var errorEl = document.getElementById("error");
+  var sheetIdleEl = document.getElementById("sheet-idle");
   var sheetEl = document.getElementById("sheet");
   var infoEl = document.getElementById("sheet-info");
   var scoreEl = document.getElementById("score");
   var rowsEl = document.getElementById("rows");
   var checkBtn = document.getElementById("check");
   var revealBtn = document.getElementById("reveal");
+  var resetBtn = document.getElementById("reset");
 
   var rows = [];
   var revealed = false;
@@ -39,21 +42,22 @@
 
   function showError(message) {
     errorEl.textContent = message;
-    errorEl.classList.remove("hidden");
+    errorEl.hidden = false;
   }
 
   function hideError() {
     errorEl.textContent = "";
-    errorEl.classList.add("hidden");
+    errorEl.hidden = true;
   }
 
   function clearSheet() {
     rows = [];
     rowsEl.innerHTML = "";
-    sheetEl.classList.add("hidden");
-    scoreEl.classList.add("hidden");
+    sheetEl.hidden = true;
+    sheetIdleEl.hidden = false;
+    scoreEl.hidden = true;
     scoreEl.textContent = "";
-    revealBtn.classList.add("hidden");
+    revealBtn.hidden = true;
     revealed = false;
     revealBtn.textContent = "แสดงเฉลย";
   }
@@ -79,7 +83,7 @@
     subject.chapters.forEach(function (chapter) {
       var option = document.createElement("option");
       option.value = String(chapter.id);
-      option.textContent = "บทที่ " + chapter.id + " — " + chapter.title;
+      option.textContent = "บทที่ " + chapter.id + " · " + chapter.title;
       chapterEl.appendChild(option);
     });
 
@@ -94,6 +98,7 @@
     startEl.max = String(max);
     endEl.value = String(Math.min(20, max));
     endEl.max = String(max);
+    rangeHintEl.textContent = "บทนี้มีข้อ 1 – " + max;
   }
 
   function detectChoice(answer) {
@@ -186,65 +191,66 @@
       .replace(/[\s,()†]/g, "");
   }
 
-  var STATUS_CLASS =
-    "status shrink-0 rounded-full px-2.5 py-1 text-xs font-medium";
-
   function setStatus(status, text, tone) {
-    var toneClass =
-      tone === "correct"
-        ? "bg-green-100 text-green-700"
-        : tone === "wrong"
-          ? "bg-red-100 text-red-700"
-          : "bg-gray-100 text-gray-600";
     status.textContent = text;
-    status.className = STATUS_CLASS + " " + toneClass;
-    status.classList.remove("hidden");
+    status.dataset.tone = tone;
+    status.hidden = false;
   }
 
   function setRowState(row, state) {
-    row.classList.remove("border-gray-300", "border-green-500", "border-red-500");
-    row.classList.add(
-      state === "correct"
-        ? "border-green-500"
-        : state === "wrong"
-          ? "border-red-500"
-          : "border-gray-300"
-    );
     row.dataset.state = state;
+  }
+
+  function clearSelection(container, selector) {
+    container.querySelectorAll(selector).forEach(function (other) {
+      other.dataset.selected = "false";
+      if (other.hasAttribute("aria-pressed")) {
+        other.setAttribute("aria-pressed", "false");
+      }
+    });
   }
 
   function makeChoiceButton(row, value) {
     var button = document.createElement("button");
     button.type = "button";
-    button.className =
-      "choice h-11 w-11 rounded-lg border border-gray-300 bg-white text-base font-medium transition-colors hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200";
+    button.className = "chip";
+    button.dataset.selected = "false";
     button.textContent = String(value);
+    button.setAttribute("aria-label", "ตัวเลือก " + value);
     button.addEventListener("click", function () {
-      row.querySelectorAll(".choice").forEach(function (other) {
-        other.classList.remove("bg-blue-700", "text-white", "border-blue-700");
-        other.classList.add("bg-white");
-      });
-      button.classList.remove("bg-white");
-      button.classList.add("bg-blue-700", "text-white", "border-blue-700");
+      clearSelection(row, ".chip");
+      button.dataset.selected = "true";
       row.dataset.userAnswer = String(value);
     });
     return button;
   }
 
-  function makeYesNoButton(row, item, value, text) {
+  function makeYesNoButton(row, item, value, caption) {
     var button = document.createElement("button");
     button.type = "button";
-    button.className =
-      "yesno-choice min-w-[4rem] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium transition-colors hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200";
-    button.textContent = text;
+    button.className = "yn-opt";
+    button.dataset.selected = "false";
     button.dataset.value = value;
+    button.setAttribute("aria-pressed", "false");
+    button.setAttribute("aria-label", item.label + " " + caption);
+    button.title = caption;
+
+    var icon = document.createElement("span");
+    icon.className = "yn-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML =
+      value === "yes"
+        ? '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"' +
+          ' stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>'
+        : '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"' +
+          ' stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>';
+
+    button.appendChild(icon);
+
     button.addEventListener("click", function () {
-      button.parentElement.querySelectorAll(".yesno-choice").forEach(function (other) {
-        other.classList.remove("bg-blue-700", "text-white", "border-blue-700");
-        other.classList.add("bg-white");
-      });
-      button.classList.remove("bg-white");
-      button.classList.add("bg-blue-700", "text-white", "border-blue-700");
+      clearSelection(button.parentElement, ".yn-opt");
+      button.dataset.selected = "true";
+      button.setAttribute("aria-pressed", "true");
       row._yesno[item.label] = value;
     });
     return button;
@@ -252,18 +258,18 @@
 
   function makeYesNoGroup(row, items) {
     var wrap = document.createElement("div");
-    wrap.className = "space-y-3";
+    wrap.className = "qcard-list";
 
     items.forEach(function (item) {
       var line = document.createElement("div");
-      line.className = "flex items-center justify-between gap-3";
+      line.className = "yn-item";
 
       var label = document.createElement("span");
-      label.className = "min-w-[4.5rem] text-sm text-gray-700";
+      label.className = "yn-label";
       label.textContent = item.label;
 
       var group = document.createElement("div");
-      group.className = "flex gap-2";
+      group.className = "yn-options";
       group.appendChild(makeYesNoButton(row, item, "yes", "ใช่"));
       group.appendChild(makeYesNoButton(row, item, "no", "ไม่ใช่"));
 
@@ -277,7 +283,7 @@
 
   function createRow(question, answer, note, choiceMax) {
     var row = document.createElement("div");
-    row.className = "rounded-lg border border-gray-300 p-4";
+    row.className = "qcard";
     row.dataset.question = String(question);
     row.dataset.answer = answer;
     row.dataset.note = note;
@@ -285,14 +291,15 @@
     row.dataset.state = "empty";
 
     var head = document.createElement("div");
-    head.className = "mb-3 flex items-center justify-between gap-2";
+    head.className = "flex items-center justify-between gap-2";
 
     var label = document.createElement("span");
-    label.className = "font-medium";
+    label.className = "text-sm font-medium";
     label.textContent = "ข้อ " + question;
 
     var status = document.createElement("span");
-    status.className = STATUS_CLASS + " hidden";
+    status.className = "status";
+    status.hidden = true;
 
     head.appendChild(label);
     head.appendChild(status);
@@ -300,37 +307,48 @@
 
     var yesno = detectYesNo(answer);
     var detected = detectChoice(answer);
+    var body = document.createElement("div");
+    body.className = "qcard-body";
 
     if (yesno) {
       row.dataset.type = "yesno";
       row._yesnoKey = yesno.items;
       row._yesno = {};
-      row.appendChild(makeYesNoGroup(row, yesno.items));
+      body.appendChild(makeYesNoGroup(row, yesno.items));
+      row.appendChild(body);
     } else if (detected) {
       row.dataset.type = "choice";
       row.dataset.choices = detected.numbers.join(",");
       var wrap = document.createElement("div");
-      wrap.className = "flex flex-wrap gap-2.5";
+      wrap.className = "flex flex-wrap gap-2";
       for (var i = 1; i <= choiceMax; i += 1) {
         wrap.appendChild(makeChoiceButton(row, i));
       }
-      row.appendChild(wrap);
+      body.appendChild(wrap);
+      row.appendChild(body);
     } else {
       row.dataset.type = "text";
       var input = document.createElement("input");
       input.type = "text";
-      input.className =
-        "w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-base focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-200";
+      input.className = "field field-sm";
       input.placeholder = "พิมพ์คำตอบ";
+      input.setAttribute("aria-label", "คำตอบข้อ " + question);
       input.addEventListener("input", function () {
         row.dataset.userAnswer = input.value;
       });
-      row.appendChild(input);
+      input.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          checkAnswers();
+        }
+      });
+      body.appendChild(input);
+      row.appendChild(body);
     }
 
     var correct = document.createElement("div");
-    correct.className =
-      "correct mt-3 hidden whitespace-pre-wrap border-t border-gray-200 pt-3 text-sm leading-relaxed text-gray-600";
+    correct.className = "correct answer-key";
+    correct.hidden = true;
     correct.textContent =
       "เฉลย: " + answer + (note ? "\nหมายเหตุ: " + note : "");
     row.appendChild(correct);
@@ -360,7 +378,7 @@
     }
 
     if (start < 1 || end < 1 || start > end || end > max) {
-      showError("ช่วงข้อไม่ถูกต้อง (บทนี้มีข้อ 1 - " + max + ")");
+      showError("ช่วงข้อไม่ถูกต้อง (บทนี้มีข้อ 1 – " + max + ")");
       return;
     }
 
@@ -385,14 +403,18 @@
     infoEl.textContent =
       subject.label +
       " · บทที่ " + chapter.id + " " + chapter.title +
-      " · ข้อ " + start + "-" + end;
-    scoreEl.classList.add("hidden");
+      " · ข้อ " + start + "–" + end;
+    scoreEl.hidden = true;
     scoreEl.textContent = "";
-    revealBtn.classList.add("hidden");
+    revealBtn.hidden = true;
     revealed = false;
     revealBtn.textContent = "แสดงเฉลย";
-    sheetEl.classList.remove("hidden");
-    sheetEl.scrollIntoView({ block: "start" });
+    sheetIdleEl.hidden = true;
+    sheetEl.hidden = false;
+
+    if (window.innerWidth < 1024) {
+      sheetEl.scrollIntoView({ block: "start" });
+    }
   }
 
   function isCorrect(row, value) {
@@ -422,7 +444,7 @@
         if (answeredCount === 0) {
           setStatus(status, "ยังไม่ได้ตอบ", "empty");
           setRowState(row, "empty");
-          correctEl.classList.toggle("hidden", !revealed);
+          correctEl.hidden = !revealed;
           return;
         }
 
@@ -438,12 +460,12 @@
           correctCount += 1;
           setStatus(status, "ถูก", "correct");
           setRowState(row, "correct");
-          correctEl.classList.add("hidden");
+          correctEl.hidden = true;
         } else {
           var partial = answeredCount < key.length;
           setStatus(status, partial ? "ตอบไม่ครบ" : "ผิด", partial ? "empty" : "wrong");
           setRowState(row, partial ? "empty" : "wrong");
-          correctEl.classList.toggle("hidden", !revealed);
+          correctEl.hidden = !revealed;
         }
         return;
       }
@@ -451,7 +473,7 @@
       if (!value) {
         setStatus(status, "ยังไม่ได้ตอบ", "empty");
         setRowState(row, "empty");
-        correctEl.classList.toggle("hidden", !revealed);
+        correctEl.hidden = !revealed;
         return;
       }
 
@@ -461,19 +483,19 @@
         correctCount += 1;
         setStatus(status, "ถูก", "correct");
         setRowState(row, "correct");
-        correctEl.classList.add("hidden");
+        correctEl.hidden = true;
       } else {
         setStatus(status, "ผิด", "wrong");
         setRowState(row, "wrong");
-        correctEl.classList.toggle("hidden", !revealed);
+        correctEl.hidden = !revealed;
       }
     });
 
     scoreEl.textContent =
       "ถูก " + correctCount + " / " + rows.length +
       (answered < rows.length ? " · ตอบแล้ว " + answered : "");
-    scoreEl.classList.remove("hidden");
-    revealBtn.classList.remove("hidden");
+    scoreEl.hidden = false;
+    revealBtn.hidden = false;
   }
 
   function toggleReveal() {
@@ -482,8 +504,28 @@
 
     rows.forEach(function (row) {
       if (row.dataset.state === "correct") return;
-      row.querySelector(".correct").classList.toggle("hidden", !revealed);
+      row.querySelector(".correct").hidden = !revealed;
     });
+  }
+
+  function resetAnswers() {
+    rows.forEach(function (row) {
+      clearSelection(row, ".chip, .yn-opt");
+      row.querySelectorAll("input.field").forEach(function (input) {
+        input.value = "";
+      });
+      row.dataset.userAnswer = "";
+      row.dataset.state = "empty";
+      row._yesno = {};
+      row.querySelector(".status").hidden = true;
+      row.querySelector(".correct").hidden = true;
+    });
+
+    scoreEl.textContent = "";
+    scoreEl.hidden = true;
+    revealBtn.hidden = true;
+    revealed = false;
+    revealBtn.textContent = "แสดงเฉลย";
   }
 
   subjectEl.addEventListener("change", populateChapters);
@@ -495,6 +537,7 @@
   setupForm.addEventListener("submit", buildSheet);
   checkBtn.addEventListener("click", checkAnswers);
   revealBtn.addEventListener("click", toggleReveal);
+  resetBtn.addEventListener("click", resetAnswers);
 
   populateSubjects();
   populateChapters();

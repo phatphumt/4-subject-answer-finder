@@ -7,12 +7,12 @@
   var threshold = 240;
 
   function sync() {
-    button.classList.toggle("hidden", window.scrollY < threshold);
+    button.hidden = window.scrollY < threshold;
   }
 
   button.addEventListener("click", function () {
     var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    button.classList.add("hidden");
+    button.hidden = true;
     window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
   });
 
